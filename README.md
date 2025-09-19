@@ -10,4 +10,5 @@ Juego de rol por turnos en consola desarrollado en Java. Permite crear un jugado
 - Mensajes y gráficos en consola usando ASCII y colores.
 
 ## Cómo jugar
-1. Clona el repositorio:
+1. Clona el repositorio
+2. Haz un RUN y ya podrás jugar!
