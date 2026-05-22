@@ -3,19 +3,21 @@ package PruebasTest.practicar.JuegoRol;
 import java.util.ArrayList;
 import java.util.Random;
 
+// Clase Monstruo: todo lo que da hostias al jugador
 public class Monstruo {
     private String nombre;
     private int vida;
     private int vidaMax;
     private int ataque;
     private int defensa;
-    private String tipo;
-    private int xpAlMorir;
-    private int oroAlMorir;
+    private String tipo;          // ej: "Bestia", "No muerto", "Dragon", "Demonio"...
+    private int xpAlMorir;        // xp que da el bicho al palmar
+    private int oroAlMorir;       // oro que suelta al palmar
     private boolean esBoss;
-    private boolean puedeRevivir;
-    private String arteAscii;
+    private boolean puedeRevivir; // pal Fenix Oscuro
+    private String arteAscii;     // dibujito para los bosses
 
+    // Constructor normal de toda la vida
     public Monstruo(String nombre, int vida, int ataque, int defensa, String tipo) {
         this.nombre = nombre;
         this.vida = vida;
@@ -23,13 +25,14 @@ public class Monstruo {
         this.ataque = ataque;
         this.defensa = defensa;
         this.tipo = tipo;
-        this.xpAlMorir = vida / 3 + ataque;
+        this.xpAlMorir = vida / 3 + ataque;  //una formulilla pa que cuadre
         this.oroAlMorir = vida / 5 + 10;
         this.esBoss = false;
         this.puedeRevivir = false;
         this.arteAscii = "";
     }
 
+    // Constructor pa cuando es boss (suelta mas xp y oro)
     public Monstruo(String nombre, int vida, int ataque, int defensa, String tipo, boolean esBoss) {
         this(nombre, vida, ataque, defensa, tipo);
         this.esBoss = esBoss;
@@ -39,6 +42,7 @@ public class Monstruo {
         }
     }
 
+    // Getters y setters
     public String getNombre() { return nombre; }
     public int getVida() { return vida; }
     public void setVida(int vida) { this.vida = vida; }
@@ -56,30 +60,33 @@ public class Monstruo {
     public String getArteAscii() { return arteAscii; }
     public void setArteAscii(String arte) { this.arteAscii = arte; }
 
-    public void recibirDano(int dano) {
-        int defReducida = (int)(dano * (defensa * 0.005));
-        int danoFinal = Math.max(1, dano - defReducida);
-        this.vida = Math.max(0, this.vida - danoFinal);
+    // Le quita vida al monstruo aplicando un poquito su defensa pa que no sea todo daño full
+    public void recibirDaño(int daño) {
+        int defReducida = (int)(daño * (defensa * 0.005)); // cada punto de defensa quita un 0.5%
+        int dañoFinal = Math.max(1, daño - defReducida);   // como minimo 1 de daño, sino se aburre uno
+        this.vida = Math.max(0, this.vida - dañoFinal);
     }
 
     public boolean estaVivo() {
         return this.vida > 0;
     }
 
+    // Devuelve el daño que mete al jugador (los bosses tienen golpe especial random)
     public int atacar() {
         Random rd = new Random();
-        int danoBase = this.ataque;
+        int dañoBase = this.ataque;
 
-        // Bosses tienen chance de golpe especial
+        // Los bosses con un 25% pegan un mamporrazo
         if(esBoss && rd.nextInt(100) < 25){
-            danoBase = (int)(this.ataque * 1.8);
+            dañoBase = (int)(this.ataque * 1.8);
             System.out.println(ColorConsola.rojo("💢 ¡" + nombre + " usa un ataque devastador!"));
         }
 
-        return danoBase;
+        return dañoBase;
     }
 
-    // Algunos monstruos aplican estados al atacar
+    // Segun el tipo de monstruo, puede dejarte un estado chungo al pegarte
+    // (no muertos envenenan, dragones queman, etc.)
     public EstadoAlterado intentarAplicarEstado(){
         Random rd = new Random();
         switch(tipo){
@@ -100,6 +107,7 @@ public class Monstruo {
             }
             case "Mago oscuro" -> {
                 if(rd.nextInt(100) < 30){
+                    // el lich te suelta o un congelado o un quemao a ver cual le toca
                     if(rd.nextBoolean()){
                         return new EstadoAlterado(EstadoAlterado.Tipo.CONGELADO, 1, 0);
                     } else {
@@ -123,10 +131,10 @@ public class Monstruo {
                 }
             }
         }
-        return null;
+        return null; //si no le toca aplicar nada, pues nada
     }
 
-    // Regeneración (hidra, troll, etc.)
+    // La Hidra y el Troll se regeneran cada turno (un 8% de su vida max)
     public void regenerar(){
         if((nombre.contains("Hidra") || nombre.contains("Troll")) && estaVivo() && vida < vidaMax){
             int regen = (int)(vidaMax * 0.08);
@@ -135,9 +143,10 @@ public class Monstruo {
         }
     }
 
+    // El Fenix Oscuro vuelve a la vida una vez con la mitad de vida (que cabron)
     public boolean intentarRevivir(){
         if(puedeRevivir && vida <= 0){
-            puedeRevivir = false;
+            puedeRevivir = false; //solo una vez, no se hace eterno
             vida = vidaMax / 2;
             System.out.println(ColorConsola.morado("\n🔥🔥🔥 ¡" + nombre + " ha renacido de sus cenizas! 🔥🔥🔥"));
             return true;
@@ -145,6 +154,7 @@ public class Monstruo {
         return false;
     }
 
+    // Imprime toda la chapa del monstruo
     public void mostrarMonstruo() {
         System.out.println(ColorConsola.cyan("\n╔══════════════════════════════════════════╗"));
         String etiqueta = esBoss ? ColorConsola.rojo("👑 BOSS ") + nombre : nombre;
@@ -157,11 +167,14 @@ public class Monstruo {
         System.out.println(ColorConsola.cyan("╚══════════════════════════════════════════╝"));
     }
 
+    // Una barrita rapida para verla en el combate
     public void mostrarBarraCorta(){
         ColorConsola.barraVida("👹 " + nombre, vida, vidaMax);
     }
 
-    // ───────────── Fábricas de monstruos ─────────────
+    // ─────── Fabricas de monstruos por dificultad ───────
+    // Las uso desde mainRol para ir generando las oleadas
+
     public static ArrayList<Monstruo> generarMonstruosFaciles(){
         ArrayList<Monstruo> lista = new ArrayList<>();
         lista.add(new Monstruo("Goblin", 40, 10, 3, "Bestia"));
@@ -193,12 +206,14 @@ public class Monstruo {
         lista.add(new Monstruo("Dragón Rojo", 220, 38, 22, "Dragon", false));
         lista.add(new Monstruo("Demonio Sombra", 200, 36, 18, "Demonio", false));
         lista.add(new Monstruo("Kraken", 240, 34, 20, "Marino", false));
+        // El Fenix Oscuro lleva la flag de revivir activada
         Monstruo fenix = new Monstruo("Fénix Oscuro", 180, 35, 16, "Dragon", false);
         fenix.setPuedeRevivir(true);
         lista.add(fenix);
         return lista;
     }
 
+    // El boss final del juego
     public static Monstruo generarBossFinal(){
         Monstruo boss = new Monstruo("Señor Oscuro Malakar", 450, 45, 25, "Demonio", true);
         boss.setArteAscii(
