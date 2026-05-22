@@ -2,87 +2,75 @@ package PruebasTest.practicar.JuegoRol;
 
 public class Objeto {
     private String nombre;
-    private String tipo; // ej: "arma", "poción", "escudo"
-    private int potenciadorDaño;
+    private String tipo; // "arma", "pocion", "armadura", "amuleto", "comida"
+    private int potenciadorDano;
     private int curacion;
+    private int bonusDefensa;
+    private int bonusAtaque;
+    private int precio;
+    private int usosRestantes;
+    private String descripcion;
 
-
-    // Constructor básico
     public Objeto(String nombre, String tipo) {
         this.nombre = nombre;
         this.tipo = tipo;
-        this.potenciadorDaño = 0;
+        this.potenciadorDano = 0;
         this.curacion = 0;
+        this.bonusDefensa = 0;
+        this.bonusAtaque = 0;
+        this.precio = 10;
+        this.usosRestantes = 1;
+        this.descripcion = "";
     }
 
-    // Constructor completo
-    public Objeto(String nombre, String tipo, int potenciadorDaño, int curacion) {
+    public Objeto(String nombre, String tipo, int potenciadorDano, int curacion, int bonusDefensa, int bonusAtaque, int precio, int usos, String descripcion) {
         this.nombre = nombre;
         this.tipo = tipo;
-        this.potenciadorDaño = potenciadorDaño;
+        this.potenciadorDano = potenciadorDano;
         this.curacion = curacion;
+        this.bonusDefensa = bonusDefensa;
+        this.bonusAtaque = bonusAtaque;
+        this.precio = precio;
+        this.usosRestantes = usos;
+        this.descripcion = descripcion;
     }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getNombre() { return nombre; }
+    public String getTipo() { return tipo; }
+    public int getPotenciadorDano() { return potenciadorDano; }
+    public int getCuracion() { return curacion; }
+    public int getBonusDefensa() { return bonusDefensa; }
+    public int getBonusAtaque() { return bonusAtaque; }
+    public int getPrecio() { return precio; }
+    public int getUsosRestantes() { return usosRestantes; }
+    public String getDescripcion() { return descripcion; }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public void setUsosRestantes(int usos) { this.usosRestantes = usos; }
+    public void consumirUso() { this.usosRestantes--; }
 
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public int getPotenciadorDaño() {
-        return potenciadorDaño;
-    }
-
-    public void setPotenciadorDaño(int potenciadorDaño) {
-        this.potenciadorDaño = potenciadorDaño;
-    }
-
-    public int getCuracion() {
-        return curacion;
-    }
-
-    public void setCuracion(int curacion) {
-        this.curacion = curacion;
-    }
-
-
-    public String mostarObjeto(){
-        String emoji = switch (tipo.toLowerCase()) {
-            case "arma" -> "🗡️ ";
-            case "poción", "pocion" -> "🧪 ";
-            case "armadura" -> "🧤 ";
-            default -> throw new IllegalStateException("Unexpected value: " + tipo.toLowerCase());
+    public String emoji(){
+        return switch (tipo.toLowerCase()) {
+            case "arma"     -> "⚔️ ";
+            case "pocion"   -> "🧪 ";
+            case "armadura" -> "🛡️ ";
+            case "amuleto"  -> "🔮 ";
+            case "comida"   -> "🍖 ";
+            case "bomba"    -> "💣 ";
+            case "pergamino"-> "📜 ";
+            default          -> "❔ ";
         };
-
-        String descrip = emoji + nombre + "[" + tipo + "]";
-        if(potenciadorDaño > 0){
-            descrip += " 💥 +" + potenciadorDaño +" daño";
-        }
-        if(curacion > 0){
-            descrip += " ❤ " + curacion + " salud";
-        }
-        return descrip;
     }
 
-    public int usarObjeto(int opc, Jugador j ){
-        if (opc == 1){ //potenciador dño
-            System.out.println("Se a utilizado el potenciador de daño " + getNombre());
-            return j.getAtaque() * getPotenciadorDaño();
-        }
-        return 0; //nada
+    public String mostrarObjeto(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(emoji()).append(ColorConsola.negrita(nombre));
+        sb.append(" [").append(tipo).append("]");
+        if(potenciadorDano > 0) sb.append(" 💥+").append(potenciadorDano).append(" dmg");
+        if(curacion > 0) sb.append(" ❤️ +").append(curacion).append(" HP");
+        if(bonusAtaque > 0) sb.append(" 🗡️+").append(bonusAtaque).append(" atk");
+        if(bonusDefensa > 0) sb.append(" 🛡️+").append(bonusDefensa).append(" def");
+        if(usosRestantes > 1) sb.append(" (x").append(usosRestantes).append(")");
+        if(!descripcion.isEmpty()) sb.append("\n   ").append(ColorConsola.cyan(descripcion));
+        return sb.toString();
     }
-
-
-
-
 }
